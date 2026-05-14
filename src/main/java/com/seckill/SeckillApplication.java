@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @MapperScan("com.seckill.mapper")
 @SpringBootApplication
 public class SeckillApplication {
-
+    //第三次完整代码测试
     public static void main(String[] args) {
         SpringApplication.run(SeckillApplication.class, args);
     }
