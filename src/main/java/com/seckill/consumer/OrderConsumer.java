@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,6 +41,7 @@ public class OrderConsumer {
     private static final String ORDER_QUEUE = "seckill:order:queue";
     /** volatile 保证多线程之间的可见性，需要停止时设为 false */
     private volatile boolean running = true;
+    private Thread consumerThread;
 
     /**
      * Spring Bean 初始化后自动启动消费线程
@@ -47,12 +49,26 @@ public class OrderConsumer {
      */
     @PostConstruct
     public void startConsumer() {
-        new Thread(this::consume, "order-consumer").start();
+        consumerThread = new Thread(this::consume, "order-consumer");
+        consumerThread.start();
+    }
+
+    /** 应用关闭时先停消费线程，再关闭 Redis 连接，避免 "Connection closed" 报错 */
+    @PreDestroy
+    public void stopConsumer() {
+        running = false;
+        if (consumerThread != null) {
+            consumerThread.interrupt();
+            try {
+                consumerThread.join(3000);  // 最多等 3 秒
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     /**
      * 消费主循环——阻塞读取 Redis List
-     *
      * leftPop 的 timeout=2秒：等 2 秒还没新订单就返回 null，
      * 然后继续下一轮循环。这样停服务时线程能及时退出
      */
@@ -72,10 +88,8 @@ public class OrderConsumer {
             }
         }
     }
-
     /**
      * 处理单个订单——加锁 → 校验 → 扣库存 → 写订单
-     *
      * 加锁原因：虽然 Lua 脚本已经做了去重（user Set），但 Redis 数据有过期时间。
      * 万一库存 Redis key 到期了但订单还没消费完，用户可能再次秒杀同一商品。
      * 这里用分布式锁做数据库层面的兜底，保证同一用户同一商品只入库一次。
