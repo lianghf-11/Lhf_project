@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: ai_agent
+  profiles:
+    active: local
+  datasource:
+    url: jdbc:postgresql://pgm-bp1o0e4uk0t7tx41io.pg.rds.aliyuncs.com:5432/yu_ai_agent
+  ai:
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        dimensions: 1024
+        distance-type: COSINE_DISTANCE
+        max-document-batch-size: 10000
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+
+# springdoc-openapi相关配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.Ai_Agent.ai_agent.controller
+
+# knife4j的一些配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+#DeepSeek
+deepseek:
+  api-key: placeholder

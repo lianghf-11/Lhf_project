@@ -1,0 +1,30 @@
+package com.Ai_Agent.ai_agent.agent.model;
+
+import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+class ManusTest {
+
+    @Resource
+    private Manus manus;
+
+    @Test
+    public void run() {
+            String userPrompt = """
+        我的另一半居住在广州天河区，请帮我找到 5 公里内合适的约会地点，
+        并结合一些网络图片，制定一份详细的约会计划，
+        并以 PDF 格式输出，PDF取名为广州天河约会""";
+
+        String answer = manus.run(userPrompt);
+        System.out.println("===== Manus 执行结果 =====");
+        System.out.println(answer);
+        System.out.println("==========================");
+        Assertions.assertNotNull(answer);
+        }
+
+}
