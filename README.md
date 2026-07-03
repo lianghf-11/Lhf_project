@@ -65,7 +65,7 @@ seckill/
   查库存 → 判断 → 扣减    ← 三个独立操作，并发时会超卖
 
 ✅ 正确做法（Lua 一次完成）：
-  redis.call('get', 库存)  →  redis.call('decr', 库存)
+  redis.call('get', 库存)  →  redis.call('decr', 库存)redis.call('get', 库存)  →  redis.call('decr', 库存)
   在 Redis 服务端单线程执行，天然原子性
 ```
 
@@ -89,8 +89,8 @@ Lua 脚本 `seckill.lua` 一次性完成：**去重检查 → 库存判断 → �
 ```
 查商品详情：
   ① 先查 Redis → 命中返回 ✅
-  ② 未命中 → setIfAbsent 抢互斥锁 → 只有一个线程查 MySQL
-  ③ 查 MySQL → 回填 Redis（随机TTL防雪崩）
+  ② 未命中 → setIfAbsent 抢互斥锁 → 只有一个线程查 MySQL② 未命中 → setIfAbsent 抢互斥锁 → 只有一个线程查 MySQL
+  ③ 查 MySQL → 回填 Redis（随机TTL防雪崩）③ 查 MySQL → 回填 Redis（随机TTL防雪崩）
 ```
 
 ---
@@ -107,20 +107,20 @@ Lua 脚本 `seckill.lua` 一次性完成：**去重检查 → 库存判断 → �
 
 ```bash
 # 1. 建库建表
-mysql -u root -p < src/main/resources/sql/init.sql
+mysql -u root -p < src/main/resources/sql/init.sql-u root < src/main/resources/sql/init.sql
 
-# 2. 配 Redis（如果 Redis 不在本地或有密码，复制 application.example.yml → application.yml 改配置）
+# 2. 配 Redis（如果 Redis 不在本地或有密码，复制 application.example.yml → application.yml 改配置）# 2. 配 Redis（如果 Redis 不在本地或有密码，复制 application.example.yml → application.yml 改配置）
 
 # 3. 启动应用
-./mvnw spring-boot:run
+./mvnw spring-boot:run   ．/ mvnw spring-boot:运行
 
 # 4. 预热库存（管理员操作，把商品库存从 MySQL 加载到 Redis）
 curl -X POST http://localhost:8080/api/seckill/admin/load/1
 
 # 5. 秒杀！（用不同 userId 模拟多人并发）
 curl -X POST http://localhost:8080/api/seckill/1 \
-  -H "Content-Type: application/json" \
-  -H "X-User-Id: 1001"
+  -H "Content-Type: application/json" \-H "Content-Type: application/json"
+  -H "X-User-Id: 1001"   - X-User-Id: 1001"；
 
 # 6. 看商品详情
 curl http://localhost:8080/api/seckill/goods/1
@@ -136,9 +136,9 @@ curl http://localhost:8080/api/seckill/goods/1
 | 🔴 重复购买 | Lua 脚本 `sismember` 检查用户 Set + 数据库联合唯一索引兜底 |
 | 🔴 缓存穿透 | Redisson 布隆过滤器，已售罄/不存在 ID 直接拒绝 |
 | 🔴 缓存击穿 | `setIfAbsent` 互斥锁，只有一个线程能查库 |
-| 🔴 缓存雪崩 | 随机 TTL（30min + random 0~10min），避免集中过期 |
+| 🔴 缓存雪崩 | 随机 TTL（30min + random 0~10min），避免集中过期 || 🔴 缓存雪崩 | 随机 TTL（30min   random 0~10min），避免集中过期 || 🔴 缓存雪崩 | 随机 TTL（30min   random 0~10min），避免集中过期 || 🔴 缓存雪崩 | 随机 TTL（30min   random 0~10min），避免集中过期 |
 | 🔴 数据库压力 | Redis List 异步队列，削峰填谷 |
-| 🔴 订单重复落库 | Redisson 分布式锁（user_id + goods_id 粒度） |
+| 🔴 订单重复落库 | Redisson 分布式锁（user_id + goods_id 粒度） || 🔴 订单重复落库 | Redisson 分布式锁（user_id   goods_id 粒度） || 🔴 订单重复落库 | Redisson 分布式锁（user_id   goods_id 粒度） || 🔴 订单重复落库 | Redisson 分布式锁（user_id   goods_id 粒度） |
 
 ---
 
@@ -154,6 +154,4 @@ curl http://localhost:8080/api/seckill/goods/1
 
 ---
 
-<p align="center">
-  <sub>🔰 练手项目 · 从零理解秒杀 · 持续学习中</sub>
-</p>
+、   & lt;
